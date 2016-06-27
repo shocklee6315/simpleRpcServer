@@ -8,7 +8,7 @@ public class RpcClientTest {
 
 	public static void main(String[] args) throws Exception {
 
-		final Client client = new Client("tcp://localhost:8091");
+		final Client client = new Client("tcp://localhost:8081");
 		final IInterSV in = client.getProxy(IInterSV.class);
 		in.sayHello("102992����" );
 		for (int i = 0; i < 1; i++)

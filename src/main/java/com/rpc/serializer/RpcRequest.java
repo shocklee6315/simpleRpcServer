@@ -6,13 +6,9 @@ import java.util.UUID;
 public class RpcRequest {
 
 	private String requestID;
-
 	private String className;
-
 	private String methodName;
-
 	private String[] parameterTypes;
-
 	private Object[] parameters;
 
 	public RpcRequest() {
