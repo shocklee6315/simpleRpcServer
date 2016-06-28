@@ -7,10 +7,9 @@ public class NettyServerConfig {
 
     private int listenPort = 8888;
     private int serverWorkerThreads = 8;
-    private int serverCallbackExecutorThreads = 0;
+    private int serverExecutorThreads = 0;
     private int serverSelectorThreads = 3;
-    private int serverOnewaySemaphoreValue = 256;
-    private int serverAsyncSemaphoreValue = 64;
+    private int serverMaxConcurrencyRequest = 64;
     private int serverChannelMaxIdleTimeSeconds = 120;
     private int serverSocketSndBufSize = 65535;
     private int serverSocketRcvBufSize = 65535;
@@ -47,33 +46,24 @@ public class NettyServerConfig {
     }
 
 
-    public int getServerOnewaySemaphoreValue() {
-        return serverOnewaySemaphoreValue;
+
+    public int getServerExecutorThreads() {
+        return serverExecutorThreads;
     }
 
 
-    public void setServerOnewaySemaphoreValue(int serverOnewaySemaphoreValue) {
-        this.serverOnewaySemaphoreValue = serverOnewaySemaphoreValue;
+    public void setServerExecutorThreads(int serverExecutorThreads) {
+        this.serverExecutorThreads = serverExecutorThreads;
     }
 
 
-    public int getServerCallbackExecutorThreads() {
-        return serverCallbackExecutorThreads;
+    public int getServerMaxConcurrencyRequest() {
+        return serverMaxConcurrencyRequest;
     }
 
 
-    public void setServerCallbackExecutorThreads(int serverCallbackExecutorThreads) {
-        this.serverCallbackExecutorThreads = serverCallbackExecutorThreads;
-    }
-
-
-    public int getServerAsyncSemaphoreValue() {
-        return serverAsyncSemaphoreValue;
-    }
-
-
-    public void setServerAsyncSemaphoreValue(int serverAsyncSemaphoreValue) {
-        this.serverAsyncSemaphoreValue = serverAsyncSemaphoreValue;
+    public void setServerMaxConcurrencyRequest(int serverMaxConcurrencyRequest) {
+        this.serverMaxConcurrencyRequest = serverMaxConcurrencyRequest;
     }
 
 
@@ -86,7 +76,6 @@ public class NettyServerConfig {
         this.serverChannelMaxIdleTimeSeconds = serverChannelMaxIdleTimeSeconds;
     }
 
-
     public int getServerSocketSndBufSize() {
         return serverSocketSndBufSize;
     }
@@ -95,7 +84,6 @@ public class NettyServerConfig {
     public void setServerSocketSndBufSize(int serverSocketSndBufSize) {
         this.serverSocketSndBufSize = serverSocketSndBufSize;
     }
-
 
     public int getServerSocketRcvBufSize() {
         return serverSocketRcvBufSize;

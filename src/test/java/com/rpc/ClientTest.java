@@ -34,7 +34,7 @@ public class ClientTest {
                     public void initChannel(SocketChannel ch) throws Exception {
 
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast(new LoggingHandler(LogLevel.INFO));
+                        p.addLast(new LoggingHandler(LogLevel.ERROR));
                         p.addLast(new LengthFieldBasedFrameDecoder(65535,0,4,0,4));
                         p.addLast(new LengthFieldPrepender(4));
                         p.addLast(new RpcMessageProtoBufDecoder());
@@ -59,21 +59,21 @@ public class ClientTest {
 
     private static class HelloClientHandler extends ChannelHandlerAdapter {
 
+        int i =0;
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             RpcMessage message = new RpcMessage();
-            ;
-            ctx.writeAndFlush(message);
+            for (int i=0;i<100;i++) {
+                ctx.writeAndFlush(message);
+            }
         }
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg){
-            if(msg instanceof RpcResponse){
-                RpcResponse resp = (RpcResponse)msg;
-                System.out.println(resp.getResult());
-            }
             if(msg instanceof RpcMessage){
                 System.out.println(((RpcMessage) msg).getMessageId());
+                System.out.println(((RpcMessage) msg).getRemarks());
                 System.out.println(msg);
+                System.out.println("消息index=" + (++i));
             }
         }
 

@@ -1,7 +1,6 @@
 package com.rpc.connector.impl;
 
 import com.rpc.common.Constants;
-import com.rpc.common.MessageType;
 import com.rpc.connector.RemoteServer;
 import com.rpc.connector.RequestProcessor;
 import com.rpc.serializer.RpcMessage;
@@ -21,10 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -33,42 +29,58 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NettyRemoteServer implements RemoteServer {
 
     private  static transient  Logger logger = LoggerFactory.getLogger(NettyRemoteServer.class);
-
+    int port =0;
     ServerBootstrap bootstrap ;
     EventLoopGroup bossGroup;
     EventLoopGroup workerGroup ;
     NettyServerConfig nettyServerConfig;
-    // 处理器
+    // 处理器 通过缓冲队列大小做流控
     private final ExecutorService processorExecutor;
     // 处理器
     private RequestProcessor requestProcessor;
-
-
-    // 信号量，异步调用情况会使用，防止本地Netty缓存请求过多
-    protected final Semaphore semaphoreAsync;
 
     public NettyRemoteServer(NettyServerConfig config){
         nettyServerConfig = config;
         bootstrap = new ServerBootstrap();
         bossGroup = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads());
         workerGroup = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads());
-        int publicThreadNums = nettyServerConfig.getServerCallbackExecutorThreads();
-        if (publicThreadNums <= 0) {
-            publicThreadNums = 4;
+        int workThreadNums = nettyServerConfig.getServerExecutorThreads();
+        if (workThreadNums <= 0) {
+            workThreadNums = 4;
         }
-        this.processorExecutor = Executors.newFixedThreadPool(publicThreadNums, new ThreadFactory() {
-            private AtomicInteger threadIndex = new AtomicInteger(0);
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "NettyServerProcessorExecutor_" + this.threadIndex.incrementAndGet());
-            }
-        });
-        semaphoreAsync = new Semaphore(nettyServerConfig.getServerAsyncSemaphoreValue());
+        //使用无界队列的newFixedThreadPool会出现系统过于繁忙的情况
+//        this.processorExecutor = Executors.newFixedThreadPool(publicThreadNums, new ThreadFactory() {
+//            private AtomicInteger threadIndex = new AtomicInteger(0);
+//            @Override
+//            public Thread newThread(Runnable r) {
+//                return new Thread(r, "NettyServerProcessorExecutor_" + this.threadIndex.incrementAndGet());
+//            }
+//        });
+        int maxRequest = nettyServerConfig.getServerMaxConcurrencyRequest();
+        if (maxRequest<=0){
+            //给个默认大小
+            maxRequest = 64;
+        }
+        this.processorExecutor = new ThreadPoolExecutor(workThreadNums, workThreadNums,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(maxRequest),
+                new ThreadFactory() {
+                    private AtomicInteger threadIndex = new AtomicInteger(0);
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        return new Thread(r, "NettyServerProcessorExecutor_" + this.threadIndex.incrementAndGet());
+                    }
+                });
+
     }
-    int port =0;
+
 
     @Override
     public void start() {
+
+        if (requestProcessor ==null){
+            throw new RuntimeException("系统需要注册请求处理器");
+        }
         bootstrap.group(bossGroup, workerGroup).channel(
                 NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024) //全连接队列长度
@@ -89,7 +101,7 @@ public class NettyRemoteServer implements RemoteServer {
                                 //rpc消息解码器
                                 p.addLast(new RpcMessageProtoBufDecoder());
                                 p.addLast(new RpcMessageProtoBufEncoder());
-                                p.addLast(new HeartBeatHandler(3));
+                                p.addLast(new HeartBeatHandler(1));
                                 p.addLast(new NettyRpcServerHandler());
                             }
                         });
@@ -195,10 +207,58 @@ public class NettyRemoteServer implements RemoteServer {
 
         }
     }
-    public void processRequest(ChannelHandlerContext ctx, RpcMessage request)throws Exception{
-        RpcMessage response =MessageUtil.createResponeMessage(Constants.ResponseCode.SUCCESS ,request.getMessageId(),"");
-        ctx.writeAndFlush(response);
+    public void processRequest(final ChannelHandlerContext ctx,final  RpcMessage request)throws Exception{
+//        RpcMessage response =MessageUtil.createResponeMessage(Constants.ResponseCode.SUCCESS ,request.getMessageId(),"");
+//        ctx.writeAndFlush(response);
+        if (requestProcessor !=null) {
+            Runnable run = new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        RpcMessage response = requestProcessor.processRequest(request);
+
+                        if (response != null) {
+                            response.setMessageId(request.getMessageId());
+                            response.markResponseType();
+                            try {
+                                ctx.writeAndFlush(response);
+                            } catch (Throwable e) {
+                                logger.error("process request over, but response failed", e);
+                                logger.error(request.toString());
+                                logger.error(response.toString());
+                            }
+                        } else {
+                            //没有处理结果 就不处理了
+
+                        }
+                    } catch (Exception e) {
+                        logger.error("处理发生异常了", e);
+                        RpcMessage response = MessageUtil.createResponeMessage(
+                                Constants.ResponseCode.SYSTEM_ERROR, request.getMessageId(), MessageUtil.exceptionDesc(e));
+                        ctx.writeAndFlush(response);
+                    }
+
+                }
+            };
+
+            try {
+                this.processorExecutor.submit(run);
+            } catch (RejectedExecutionException e) {
+                //服务器请求满了
+                logger.error("服务器处理线程已经满了,无法处理请求", e);
+                RpcMessage response = MessageUtil.createResponeMessage(
+                        Constants.ResponseCode.SYSTEM_BUSY, request.getMessageId(), "system  busy! ");
+                ctx.writeAndFlush(response);
+            }
+
+        }else{
+            //服务器没有注册请求处理实现 理论上是不可能到这里的
+            throw new RuntimeException("系统需要注册请求处理器");
+
+        }
     }
+
     public void processResponse(ChannelHandlerContext ctx, RpcMessage msg)throws Exception {
 
     }
