@@ -208,8 +208,7 @@ public class NettyRemoteServer implements RemoteServer {
         }
     }
     public void processRequest(final ChannelHandlerContext ctx,final  RpcMessage request)throws Exception{
-//        RpcMessage response =MessageUtil.createResponeMessage(Constants.ResponseCode.SUCCESS ,request.getMessageId(),"");
-//        ctx.writeAndFlush(response);
+
         if (requestProcessor !=null) {
             Runnable run = new Runnable() {
                 @Override

@@ -1,10 +1,13 @@
 package com.rpc.connector.impl;
 
 import com.rpc.serializer.RpcMessage;
+import com.rpc.util.NetUtil;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -12,6 +15,7 @@ import io.netty.handler.timeout.IdleStateEvent;
  */
 public class HeartBeatHandler extends ChannelHandlerAdapter{
 
+    Logger logger = LoggerFactory.getLogger(this.getClass());
     int count =0;
     int maxidle ;
     public HeartBeatHandler(int maxidle){
@@ -58,7 +62,8 @@ public class HeartBeatHandler extends ChannelHandlerAdapter{
     }
 
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelInactive");
+        final String remoteAddress =NetUtil.parseChannelRemoteAddr(ctx.channel());
+        logger.error("---->channelInactive [{}]" , remoteAddress);
         //如果通道关闭了,那就移除掉
         ctx.fireChannelInactive();
     }
