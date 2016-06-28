@@ -1,13 +1,7 @@
 package com.rpc.client.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -43,7 +37,7 @@ public class NettyConnection implements Connection{
 		this.host = host;
 		this.port = port;
 		EventLoopGroup group = new NioEventLoopGroup();
-		// ÉèÖÃÒ»¸ö´¦Àí·þÎñ¶ËÏûÏ¢ºÍ¸÷ÖÖÏûÏ¢ÊÂ¼þµÄÀà(Handler)
+		// ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½(Handler)
 		bootstrap.group(group).channel(NioSocketChannel.class).option(
 				ChannelOption.TCP_NODELAY, true).handler(
 				new ChannelInitializer<SocketChannel>() {
@@ -69,7 +63,7 @@ public class NettyConnection implements Connection{
 	public Future<RpcResponse> sendRequest(RpcRequest request){
 		
 		if (!connected.get()) {
-			throw new RuntimeException("Î´Á¬½Ó");
+			throw new RuntimeException("Î´ï¿½ï¿½ï¿½ï¿½");
 		}
 		CallFuture<RpcResponse> callFuture = new CallFuture<RpcResponse> ();
 		String requestId = request.getRequestID();
@@ -104,12 +98,12 @@ public class NettyConnection implements Connection{
 
 		@Override
 		public void channelActive(ChannelHandlerContext ctx) {
-			System.out.println("Á¬½ÓÔ¶³Ì·þÎñÆ÷³É¹¦");
+			System.out.println("ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Ì·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½");
 
 		}
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) {
-//			System.out.println("»ñµÃÏûÏ¢µ±Ç°Ê±¼ä"+ System.currentTimeMillis());
+//			System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ç°Ê±ï¿½ï¿½"+ System.currentTimeMillis());
 			if (msg instanceof RpcResponse) {
 				RpcResponse resp = (RpcResponse) msg;
 				String requestId = resp.getRequestID();
@@ -145,11 +139,16 @@ public class NettyConnection implements Connection{
 	@Override
 	public void sendRequest(RpcRequest request, Callback<RpcResponse> callback) {
 		if (!connected.get()) {
-			throw new RuntimeException("Î´Á¬½Ó");
+			throw new RuntimeException("Î´ï¿½ï¿½ï¿½ï¿½");
 		}
 		String requestId = request.getRequestID();
 		results.put(requestId, callback);
-		ch.channel().pipeline().writeAndFlush(request);
+		ch.channel().pipeline().writeAndFlush(request).addListener(new ChannelFutureListener() {
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+
+			}
+		});
 		
 	}
 }

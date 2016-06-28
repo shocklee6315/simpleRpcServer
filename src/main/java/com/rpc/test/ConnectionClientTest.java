@@ -77,7 +77,15 @@ public class ConnectionClientTest {
                         byte[] msg = ("这条是客户端发送过来的消息" + System.currentTimeMillis() + System.getProperty("line.separator")).getBytes();
                         ByteBuf message = Unpooled.buffer(100);
                         message.writeBytes(msg);
-                        ctx.writeAndFlush(message);
+                        ctx.writeAndFlush(message).addListener(new ChannelFutureListener() {
+                            @Override
+                            public void operationComplete(ChannelFuture future) throws Exception {
+                                if(!future.isSuccess()){
+                                    System.out.println("客户端消息发送失败"+Thread.currentThread());
+                                    future.cause().printStackTrace();
+                                }
+                            }
+                        });
 //                        if(i> 10){
 //                            ctx.channel().closeFuture().addListener(ChannelFutureListener.CLOSE);
 //                        }

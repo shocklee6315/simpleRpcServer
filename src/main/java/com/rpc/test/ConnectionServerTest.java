@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.marshalling.ThreadLocalMarshallerProvider;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -49,7 +50,15 @@ public class ConnectionServerTest {
                                 byte[] msg = ("这条是服务器端发送过来的消息" + System.currentTimeMillis() + System.getProperty("line.separator")).getBytes();
                                 ByteBuf message = Unpooled.buffer(100);
                                 message.writeBytes(msg);
-                                ctx.writeAndFlush(message);
+                                ctx.writeAndFlush(message).addListener(new ChannelFutureListener() {
+                                    @Override
+                                    public void operationComplete(ChannelFuture future) throws Exception {
+                                        if(!future.isSuccess()){
+                                            System.out.println("发送失败了" + Thread.currentThread());
+                                            future.cause().printStackTrace();
+                                        }
+                                    }
+                                });
 //                            future.channel().pipeline().writeAndFlush(message);
                                 System.out.println("循环一次" + ctx.channel().isActive() );
 //                                if(i> 10){
@@ -74,7 +83,7 @@ public class ConnectionServerTest {
                     }
                 }.start();
 
-                future.channel().closeFuture().sync();
+//                future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -128,7 +137,7 @@ public class ConnectionServerTest {
                 public void channelInactive(ChannelHandlerContext ctx) throws Exception {
                     System.out.println("channelInactive");
                     //如果通道关闭了,那就移除掉
-                    aset.remove(ctx);
+//                    aset.remove(ctx);
                     ctx.fireChannelInactive();
                 }
                 public void userEventTriggered(

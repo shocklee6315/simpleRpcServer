@@ -1,16 +1,17 @@
 package com.rpc;
 
-import com.rpc.connector.impl.NettyConnector;
+import com.rpc.connector.impl.NettyRemoteServer;
+import com.rpc.connector.impl.NettyServerConfig;
 
 /**
  * Created by shocklee on 16/6/27.
  */
 public class ConnectorTest {
-    public static void main(String[] args) {
-        NettyConnector connector = new NettyConnector();
-        connector.setPort(8081);
-        connector.setAcceptThreads(1);
-        connector.setWorkThreads(5);
+    public static void main(String[] args) throws Exception{
+        NettyServerConfig config = new NettyServerConfig();
+        config.setListenPort(8081);
+        NettyRemoteServer connector = new NettyRemoteServer(config);
         connector.start();
+        System.in.read();
     }
 }

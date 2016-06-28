@@ -2,7 +2,6 @@ package com.rpc;
 
 import com.rpc.connector.impl.*;
 import com.rpc.serializer.*;
-import com.rpc.test.IInterSV;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,7 +11,6 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
 
@@ -41,7 +39,7 @@ public class ClientTest {
                         p.addLast(new LengthFieldPrepender(4));
                         p.addLast(new RpcMessageProtoBufDecoder());
                         p.addLast(new RpcMessageProtoBufEncoder());
-                        p.addLast(new ServerHeartBeatHandler(300));
+                        p.addLast(new HeartBeatHandler(300));
                         p.addLast(new HelloClientHandler());
                     }
                 });
@@ -64,7 +62,7 @@ public class ClientTest {
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             RpcMessage message = new RpcMessage();
-            message.setMessageType((short)1);
+            ;
             ctx.writeAndFlush(message);
         }
         @Override

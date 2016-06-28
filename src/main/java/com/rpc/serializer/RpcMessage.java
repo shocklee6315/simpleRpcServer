@@ -7,42 +7,61 @@ import java.util.UUID;
  */
 public class RpcMessage {
 
-    public RpcMessage(){
-        this.messageId= UUID.randomUUID().toString();
+    private static final int RPC_TYPE = 0; // 0, REQUEST ; 1, RESPONSE
+
+    private static final int RPC_HEARTBREAT = 1; // 0, NO ;1, YES
+
+    /**
+     * header部分
+     */
+    private int version;
+    private String messageId;
+    private int rtnCode;
+    /**
+     * 消息类型标记,从低位到高位 第一位代表类型 0请求 ,1响应
+     * 第二位代表心跳消息 1是 0否
+     * 第三位代表..
+     */
+    private int msgFlag=0;
+
+    /**
+     * body部分
+     */
+    private byte[] body;
+
+
+    public RpcMessage() {
+        this.messageId = UUID.randomUUID().toString();
     }
 
-    public RpcMessage(String id){
+    public RpcMessage(String id) {
         this.messageId = id;
     }
 
-    public short getVersion() {
+    public int getVersion() {
         return version;
     }
 
-    public void setVersion(short version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
-    private short version;
-
-    public short getRtnCode() {
+    public int getRtnCode() {
         return rtnCode;
     }
 
-    public void setRtnCode(short rtnCode) {
+    public void setRtnCode(int rtnCode) {
         this.rtnCode = rtnCode;
     }
 
-    public short getMessageType() {
-        return messageType;
+    public int getMsgFlag() {
+        return msgFlag;
     }
 
-    public void setMessageType(short messageType) {
-        this.messageType = messageType;
+    public void setMsgFlag(int msgFlag) {
+        this.msgFlag = msgFlag;
     }
 
-    private short rtnCode;
-    private short messageType;//消息类型,1请求,2响应 ,3 心跳请求 4 心跳相应
 
     public byte[] getBody() {
         return body;
@@ -60,8 +79,24 @@ public class RpcMessage {
         this.messageId = messageId;
     }
 
-    private String messageId ;
+    public void markResponseType() {
+        int bits = 1 << RPC_TYPE;
+        this.msgFlag |= bits;
+    }
 
-    private byte[] body;//消息体
+    public boolean isResponseType() {
+        int bits = 1 << RPC_TYPE;
+        return (this.msgFlag & bits) == bits;
+    }
+
+    public void markHeartBreat(){
+        int bits = 1 << RPC_HEARTBREAT;
+        this.msgFlag |= bits;
+    }
+
+    public boolean isHeartBreat(){
+        int bits = 1 << RPC_HEARTBREAT;
+        return (this.msgFlag & bits) == bits;
+    }
 
 }

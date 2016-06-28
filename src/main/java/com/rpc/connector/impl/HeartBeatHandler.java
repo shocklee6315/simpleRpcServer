@@ -10,25 +10,28 @@ import io.netty.handler.timeout.IdleStateEvent;
 /**
  * Created by shocklee on 16/6/26.
  */
-public class ServerHeartBeatHandler extends ChannelHandlerAdapter{
+public class HeartBeatHandler extends ChannelHandlerAdapter{
 
     int count =0;
     int maxidle ;
-    public ServerHeartBeatHandler(int maxidle){
+    public HeartBeatHandler(int maxidle){
         this.maxidle = maxidle;
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception{
-
         if(msg instanceof RpcMessage) {
-            if (((RpcMessage) msg).getMessageType() == 3) {
-                RpcMessage pong = new RpcMessage();
-                pong.setMessageType((short)4);
-                ctx.writeAndFlush(pong);
-            } else if (((RpcMessage) msg).getMessageType() == 4) {
-                count = 0;
-            } else{
+            RpcMessage rpcMessage = (RpcMessage)msg;
+            if (rpcMessage.isHeartBreat()) {
+                if(rpcMessage.isResponseType()){
+                    count = 0;
+                }else{
+                    RpcMessage pong = new RpcMessage();
+                    pong.markHeartBreat();
+                    pong.markResponseType();
+                    ctx.writeAndFlush(pong);
+                }
+            }else{
                 ctx.fireChannelRead(msg);
             }
             return ;
@@ -39,14 +42,15 @@ public class ServerHeartBeatHandler extends ChannelHandlerAdapter{
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (IdleStateEvent.class.isAssignableFrom(evt.getClass())) {
             IdleStateEvent event = (IdleStateEvent) evt;
-            if (event.state() == IdleState.READER_IDLE) {
+            if (event.state() == IdleState.ALL_IDLE) {
                 //读数据超时
                 count++;
                 if (count >= maxidle) {
                     ctx.channel().close();
                 } else {
                     RpcMessage ping = new RpcMessage();
-                    ping.setMessageType((short) 3);
+//                    ping.markResponseType();
+                    ping.markHeartBreat();
                     ctx.writeAndFlush(ping);
                 }
             }
