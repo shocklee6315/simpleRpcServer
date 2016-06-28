@@ -157,14 +157,6 @@ public class NettyRemoteServer implements RemoteServer {
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception{
             if(msg instanceof RpcMessage){
                 RpcMessage request = (RpcMessage)msg;
-//                RpcMessage response =new  RpcMessage(request.getMessageId());
-//                try {
-////                    RpcMessage response = requestProcessor.processRequest(request);
-//                    response.markResponseType();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                ctx.writeAndFlush(response);
                 processRpcMessage(ctx,request);
             }
         }
@@ -221,7 +213,7 @@ public class NettyRemoteServer implements RemoteServer {
                             response.setMessageId(request.getMessageId());
                             response.markResponseType();
                             try {
-                                ctx.writeAndFlush(response);
+                                ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());
                             } catch (Throwable e) {
                                 logger.error("process request over, but response failed", e);
                                 logger.error(request.toString());
@@ -235,7 +227,7 @@ public class NettyRemoteServer implements RemoteServer {
                         logger.error("处理发生异常了", e);
                         RpcMessage response = MessageUtil.createResponeMessage(
                                 Constants.ResponseCode.SYSTEM_ERROR, request.getMessageId(), MessageUtil.exceptionDesc(e));
-                        ctx.writeAndFlush(response);
+                        ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());;
                     }
 
                 }
@@ -248,7 +240,7 @@ public class NettyRemoteServer implements RemoteServer {
                 logger.error("服务器处理线程已经满了,无法处理请求", e);
                 RpcMessage response = MessageUtil.createResponeMessage(
                         Constants.ResponseCode.SYSTEM_BUSY, request.getMessageId(), "system  busy! ");
-                ctx.writeAndFlush(response);
+                ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());
             }
 
         }else{
@@ -260,5 +252,17 @@ public class NettyRemoteServer implements RemoteServer {
 
     public void processResponse(ChannelHandlerContext ctx, RpcMessage msg)throws Exception {
 
+    }
+
+    static  class ResponseSendFutureListen implements ChannelFutureListener{
+
+        @Override
+        public void operationComplete(ChannelFuture future) throws Exception {
+            if (!future.isSuccess()){
+                //发送失败了 向远程写数据发生了异常
+                Throwable ex =future.cause();
+                logger.error("write to remote endpoint exception  " , ex);
+            }
+        }
     }
 }
