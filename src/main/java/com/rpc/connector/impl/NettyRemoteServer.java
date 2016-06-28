@@ -1,8 +1,11 @@
 package com.rpc.connector.impl;
 
+import com.rpc.common.Constants;
+import com.rpc.common.MessageType;
 import com.rpc.connector.RemoteServer;
 import com.rpc.connector.RequestProcessor;
 import com.rpc.serializer.RpcMessage;
+import com.rpc.util.MessageUtil;
 import com.rpc.util.NetUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +43,10 @@ public class NettyRemoteServer implements RemoteServer {
     // 处理器
     private RequestProcessor requestProcessor;
 
+
+    // 信号量，异步调用情况会使用，防止本地Netty缓存请求过多
+    protected final Semaphore semaphoreAsync;
+
     public NettyRemoteServer(NettyServerConfig config){
         nettyServerConfig = config;
         bootstrap = new ServerBootstrap();
@@ -55,6 +63,7 @@ public class NettyRemoteServer implements RemoteServer {
                 return new Thread(r, "NettyServerProcessorExecutor_" + this.threadIndex.incrementAndGet());
             }
         });
+        semaphoreAsync = new Semaphore(nettyServerConfig.getServerAsyncSemaphoreValue());
     }
     int port =0;
 
@@ -128,22 +137,23 @@ public class NettyRemoteServer implements RemoteServer {
     class NettyRpcServerHandler extends ChannelHandlerAdapter{
 
         @Override
-        public void channelReadComplete(ChannelHandlerContext ctx) {
+        public void channelReadComplete(ChannelHandlerContext ctx)throws Exception {
             ctx.flush();
         }
 
         @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception{
             if(msg instanceof RpcMessage){
                 RpcMessage request = (RpcMessage)msg;
-                RpcMessage response =new  RpcMessage(request.getMessageId());
-                try {
-//                    RpcMessage response = requestProcessor.processRequest(request);
-                    response.markResponseType();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                ctx.writeAndFlush(response);
+//                RpcMessage response =new  RpcMessage(request.getMessageId());
+//                try {
+////                    RpcMessage response = requestProcessor.processRequest(request);
+//                    response.markResponseType();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                ctx.writeAndFlush(response);
+                processRpcMessage(ctx,request);
             }
         }
 
@@ -169,5 +179,27 @@ public class NettyRemoteServer implements RemoteServer {
         }
     }
 
+    public void processRpcMessage( ChannelHandlerContext ctx, RpcMessage msg)throws Exception {
 
+        final RpcMessage message = msg;
+        if(message !=null){
+            switch (msg.getType()){
+                case REQUEST_MESSAGE:
+                    processRequest(ctx, message);
+                    break;
+                case RESPONSE_MESSAGE:
+                    processResponse(ctx, message);
+                    break;
+                default:break;
+            }
+
+        }
+    }
+    public void processRequest(ChannelHandlerContext ctx, RpcMessage request)throws Exception{
+        RpcMessage response =MessageUtil.createResponeMessage(Constants.ResponseCode.SUCCESS ,request.getMessageId(),"");
+        ctx.writeAndFlush(response);
+    }
+    public void processResponse(ChannelHandlerContext ctx, RpcMessage msg)throws Exception {
+
+    }
 }

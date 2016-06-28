@@ -1,5 +1,7 @@
 package com.rpc.serializer;
 
+import com.rpc.common.MessageType;
+
 import java.util.UUID;
 
 /**
@@ -24,6 +26,8 @@ public class RpcMessage {
      */
     private int msgFlag=0;
 
+
+    private String remarks;
     /**
      * body部分
      */
@@ -79,6 +83,15 @@ public class RpcMessage {
         this.messageId = messageId;
     }
 
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
     public void markResponseType() {
         int bits = 1 << RPC_TYPE;
         this.msgFlag |= bits;
@@ -97,6 +110,13 @@ public class RpcMessage {
     public boolean isHeartBreat(){
         int bits = 1 << RPC_HEARTBREAT;
         return (this.msgFlag & bits) == bits;
+    }
+
+    public MessageType getType() {
+        if (isResponseType()) {
+            return MessageType.RESPONSE_MESSAGE;
+        }
+        return MessageType.REQUEST_MESSAGE;
     }
 
 }
