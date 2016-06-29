@@ -1,7 +1,7 @@
-package com.rpc.remote.impl;
+package com.shock.remote.server;
 
-import com.rpc.serializer.RpcMessage;
-import com.rpc.util.NetUtil;
+import com.shock.remote.protocol.RemoteMessage;
+import com.shock.remote.common.NetUtil;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
@@ -24,13 +24,13 @@ public class HeartBeatHandler extends ChannelHandlerAdapter{
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception{
-        if(msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage)msg;
+        if(msg instanceof RemoteMessage) {
+            RemoteMessage rpcMessage = (RemoteMessage)msg;
             if (rpcMessage.isHeartBreat()) {
                 if(rpcMessage.isResponseType()){
                     count = 0;
                 }else{
-                    RpcMessage pong = new RpcMessage();
+                    RemoteMessage pong = new RemoteMessage();
                     pong.markHeartBreat();
                     pong.markResponseType();
                     ctx.writeAndFlush(pong);
@@ -52,7 +52,7 @@ public class HeartBeatHandler extends ChannelHandlerAdapter{
                 if (count >= maxidle) {
                     ctx.channel().close();
                 } else {
-                    RpcMessage ping = new RpcMessage();
+                    RemoteMessage ping = new RemoteMessage();
 //                    ping.markResponseType();
                     ping.markHeartBreat();
                     ctx.writeAndFlush(ping);

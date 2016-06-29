@@ -1,4 +1,4 @@
-package com.rpc.util;
+package com.shock.remote.common;
 
 import com.dyuproject.protostuff.Schema;
 import com.dyuproject.protostuff.runtime.RuntimeSchema;

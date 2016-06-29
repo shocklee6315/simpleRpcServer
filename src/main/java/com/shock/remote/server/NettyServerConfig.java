@@ -1,4 +1,4 @@
-package com.rpc.remote.impl;
+package com.shock.remote.server;
 
 /**
  * Created by shocklee on 16/6/28.

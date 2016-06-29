@@ -1,4 +1,4 @@
-package com.rpc.util;
+package com.shock.remote.common;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

@@ -1,9 +1,9 @@
 package com.rpc;
 
-import com.rpc.remote.RequestProcessor;
-import com.rpc.remote.impl.NettyRemoteServer;
-import com.rpc.remote.impl.NettyServerConfig;
-import com.rpc.serializer.RpcMessage;
+import com.shock.remote.RequestProcessor;
+import com.shock.remote.server.NettyRemoteServer;
+import com.shock.remote.server.NettyServerConfig;
+import com.shock.remote.protocol.RemoteMessage;
 
 /**
  * Created by shocklee on 16/6/27.
@@ -16,8 +16,8 @@ public class ConnectorTest {
         RequestProcessor processor = new RequestProcessor(){
 
             @Override
-            public RpcMessage processRequest(RpcMessage request) throws Exception {
-                RpcMessage response = new RpcMessage();
+            public RemoteMessage processRequest(RemoteMessage request) throws Exception {
+                RemoteMessage response = new RemoteMessage();
                 response.setVersion(1);
                 response.setRemarks("测试消息");
                 //试试耗时的拒绝消息

@@ -1,13 +1,13 @@
-package com.rpc.serializer;
+package com.shock.remote.protocol;
 
-import com.rpc.common.MessageType;
+import com.shock.remote.protocol.MessageType;
 
 import java.util.UUID;
 
 /**
  * Created by shocklee on 16/6/27.
  */
-public class RpcMessage {
+public class RemoteMessage {
 
     private static final int RPC_TYPE = 0; // 0, REQUEST ; 1, RESPONSE
 
@@ -34,11 +34,11 @@ public class RpcMessage {
     private byte[] body;
 
 
-    public RpcMessage() {
+    public RemoteMessage() {
         this.messageId = UUID.randomUUID().toString();
     }
 
-    public RpcMessage(String id) {
+    public RemoteMessage(String id) {
         this.messageId = id;
     }
 

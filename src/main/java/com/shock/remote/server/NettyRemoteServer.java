@@ -1,11 +1,11 @@
-package com.rpc.remote.impl;
+package com.shock.remote.server;
 
-import com.rpc.common.Constants;
-import com.rpc.remote.RemoteServer;
-import com.rpc.remote.RequestProcessor;
-import com.rpc.serializer.RpcMessage;
-import com.rpc.util.MessageUtil;
-import com.rpc.util.NetUtil;
+import com.shock.remote.common.Constants;
+import com.shock.remote.RemoteServer;
+import com.shock.remote.RequestProcessor;
+import com.shock.remote.protocol.RemoteMessage;
+import com.shock.remote.common.MessageUtil;
+import com.shock.remote.common.NetUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -155,8 +155,8 @@ public class NettyRemoteServer implements RemoteServer {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception{
-            if(msg instanceof RpcMessage){
-                RpcMessage request = (RpcMessage)msg;
+            if(msg instanceof RemoteMessage){
+                RemoteMessage request = (RemoteMessage)msg;
                 processRpcMessage(ctx,request);
             }
         }
@@ -183,9 +183,9 @@ public class NettyRemoteServer implements RemoteServer {
         }
     }
 
-    public void processRpcMessage( ChannelHandlerContext ctx, RpcMessage msg)throws Exception {
+    public void processRpcMessage( ChannelHandlerContext ctx, RemoteMessage msg)throws Exception {
 
-        final RpcMessage message = msg;
+        final RemoteMessage message = msg;
         if(message !=null){
             switch (msg.getType()){
                 case REQUEST_MESSAGE:
@@ -199,7 +199,7 @@ public class NettyRemoteServer implements RemoteServer {
 
         }
     }
-    public void processRequest(final ChannelHandlerContext ctx,final  RpcMessage request)throws Exception{
+    public void processRequest(final ChannelHandlerContext ctx,final RemoteMessage request)throws Exception{
 
         if (requestProcessor !=null) {
             Runnable run = new Runnable() {
@@ -207,7 +207,7 @@ public class NettyRemoteServer implements RemoteServer {
                 public void run() {
 
                     try {
-                        RpcMessage response = requestProcessor.processRequest(request);
+                        RemoteMessage response = requestProcessor.processRequest(request);
 
                         if (response != null) {
                             response.setMessageId(request.getMessageId());
@@ -225,7 +225,7 @@ public class NettyRemoteServer implements RemoteServer {
                         }
                     } catch (Exception e) {
                         logger.error("处理发生异常了", e);
-                        RpcMessage response = MessageUtil.createResponeMessage(
+                        RemoteMessage response = MessageUtil.createResponeMessage(
                                 Constants.ResponseCode.SYSTEM_ERROR, request.getMessageId(), MessageUtil.exceptionDesc(e));
                         ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());;
                     }
@@ -238,7 +238,7 @@ public class NettyRemoteServer implements RemoteServer {
             } catch (RejectedExecutionException e) {
                 //服务器请求满了
                 logger.error("服务器处理线程已经满了,无法处理请求", e);
-                RpcMessage response = MessageUtil.createResponeMessage(
+                RemoteMessage response = MessageUtil.createResponeMessage(
                         Constants.ResponseCode.SYSTEM_BUSY, request.getMessageId(), "system  busy! ");
                 ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());
             }
@@ -250,7 +250,7 @@ public class NettyRemoteServer implements RemoteServer {
         }
     }
 
-    public void processResponse(ChannelHandlerContext ctx, RpcMessage msg)throws Exception {
+    public void processResponse(ChannelHandlerContext ctx, RemoteMessage msg)throws Exception {
 
     }
 

@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 
 import com.rpc.serializer.RpcRequest;
 import com.rpc.serializer.RpcResponse;
-import com.rpc.util.ClassUtil;
+import com.shock.remote.common.ClassUtil;
 
 public class Client {
 	ConnectionManager connectionManager;
@@ -65,7 +65,7 @@ public class Client {
 			String className = clazz.getName();
 			String methodName = method.getName();
 			Class<?>[] params = method.getParameterTypes();
-			//Èç¹ûÊÇ equals ,toString hashCode 
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ equals ,toString hashCode 
 			if(methodName.equals("equals")&& params.length == 1 && params[0].equals(Object.class)){
 				Object value = args[0];
 				if (value == null || !Proxy.isProxyClass(value.getClass()))

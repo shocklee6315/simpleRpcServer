@@ -1,10 +1,10 @@
-package com.rpc.remote.impl;
+package com.shock.remote.server;
 
 import com.dyuproject.protostuff.ProtobufIOUtil;
 import com.dyuproject.protostuff.Schema;
-import com.rpc.serializer.RpcMessage;
-import com.rpc.util.IOUtils;
-import com.rpc.util.SchemaCache;
+import com.shock.remote.protocol.RemoteMessage;
+import com.shock.remote.common.IOUtils;
+import com.shock.remote.common.SchemaCache;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,10 +23,10 @@ public class RpcMessageProtoBufDecoder extends ByteToMessageDecoder {
             return;
         }
         ByteBufInputStream ins = new ByteBufInputStream(in);
-        Schema schema = SchemaCache.getSchema(RpcMessage.class);
+        Schema schema = SchemaCache.getSchema(RemoteMessage.class);
         byte[] bytes = new byte[length];
         IOUtils.readFully(ins, bytes, 0, length);
-        RpcMessage request = new RpcMessage();
+        RemoteMessage request = new RemoteMessage();
         ProtobufIOUtil.mergeFrom(bytes, request, schema);
         out.add(request);
     }

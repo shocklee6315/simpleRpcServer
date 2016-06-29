@@ -1,4 +1,4 @@
-package com.rpc.util;
+package com.shock.remote.common;
 
 
 public class ClassUtil {

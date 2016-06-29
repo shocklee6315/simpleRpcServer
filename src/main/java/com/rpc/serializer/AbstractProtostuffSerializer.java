@@ -6,8 +6,8 @@ import java.io.OutputStream;
 
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.Schema;
-import com.rpc.util.IOUtils;
-import com.rpc.util.SchemaCache;
+import com.shock.remote.common.IOUtils;
+import com.shock.remote.common.SchemaCache;
 
 public abstract class AbstractProtostuffSerializer implements ClientSerializer,
 		ServerSerializer {

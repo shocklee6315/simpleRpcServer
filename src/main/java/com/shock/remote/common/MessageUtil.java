@@ -1,6 +1,6 @@
-package com.rpc.util;
+package com.shock.remote.common;
 
-import com.rpc.serializer.RpcMessage;
+import com.shock.remote.protocol.RemoteMessage;
 
 /**
  * Created by shocklee on 16/6/28.
@@ -8,8 +8,8 @@ import com.rpc.serializer.RpcMessage;
 public final class MessageUtil {
 
 
-    public static RpcMessage createResponeMessage(int code ,String messageId ,String remarks ){
-        RpcMessage response = new RpcMessage(messageId);
+    public static RemoteMessage createResponeMessage(int code , String messageId , String remarks ){
+        RemoteMessage response = new RemoteMessage(messageId);
         response.markResponseType();
         response.setRtnCode(code);
         response.setRemarks(remarks);

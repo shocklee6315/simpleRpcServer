@@ -1,7 +1,9 @@
 package com.rpc;
 
-import com.rpc.remote.impl.*;
-import com.rpc.serializer.*;
+import com.shock.remote.protocol.RemoteMessage;
+import com.shock.remote.server.HeartBeatHandler;
+import com.shock.remote.server.RpcMessageProtoBufDecoder;
+import com.shock.remote.server.RpcMessageProtoBufEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -62,16 +64,16 @@ public class ClientTest {
         int i =0;
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
-            RpcMessage message = new RpcMessage();
+            RemoteMessage message = new RemoteMessage();
             for (int i=0;i<100;i++) {
                 ctx.writeAndFlush(message);
             }
         }
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg){
-            if(msg instanceof RpcMessage){
-                System.out.println(((RpcMessage) msg).getMessageId());
-                System.out.println(((RpcMessage) msg).getRemarks());
+            if(msg instanceof RemoteMessage){
+                System.out.println(((RemoteMessage) msg).getMessageId());
+                System.out.println(((RemoteMessage) msg).getRemarks());
                 System.out.println(msg);
                 System.out.println("消息index=" + (++i));
             }
