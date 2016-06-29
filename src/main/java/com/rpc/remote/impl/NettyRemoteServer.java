@@ -1,8 +1,8 @@
-package com.rpc.connector.impl;
+package com.rpc.remote.impl;
 
 import com.rpc.common.Constants;
-import com.rpc.connector.RemoteServer;
-import com.rpc.connector.RequestProcessor;
+import com.rpc.remote.RemoteServer;
+import com.rpc.remote.RequestProcessor;
 import com.rpc.serializer.RpcMessage;
 import com.rpc.util.MessageUtil;
 import com.rpc.util.NetUtil;

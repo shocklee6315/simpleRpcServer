@@ -1,4 +1,4 @@
-package com.rpc.connector.impl;
+package com.rpc.remote.impl;
 
 import com.rpc.serializer.RpcMessage;
 import com.rpc.util.NetUtil;

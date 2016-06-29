@@ -1,8 +1,8 @@
 package com.rpc;
 
-import com.rpc.connector.RequestProcessor;
-import com.rpc.connector.impl.NettyRemoteServer;
-import com.rpc.connector.impl.NettyServerConfig;
+import com.rpc.remote.RequestProcessor;
+import com.rpc.remote.impl.NettyRemoteServer;
+import com.rpc.remote.impl.NettyServerConfig;
 import com.rpc.serializer.RpcMessage;
 
 /**

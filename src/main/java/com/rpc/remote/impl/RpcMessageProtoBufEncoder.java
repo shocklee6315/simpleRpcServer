@@ -1,4 +1,4 @@
-package com.rpc.connector.impl;
+package com.rpc.remote.impl;
 
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtobufIOUtil;

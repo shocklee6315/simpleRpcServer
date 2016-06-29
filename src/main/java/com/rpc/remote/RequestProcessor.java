@@ -1,4 +1,4 @@
-package com.rpc.connector;
+package com.rpc.remote;
 
 import com.rpc.serializer.RpcMessage;
 

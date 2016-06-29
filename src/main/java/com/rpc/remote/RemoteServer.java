@@ -1,4 +1,4 @@
-package com.rpc.connector;
+package com.rpc.remote;
 
 /**
  * Created by shocklee on 16/6/26.

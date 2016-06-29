@@ -1,6 +1,6 @@
 package com.rpc;
 
-import com.rpc.connector.impl.*;
+import com.rpc.remote.impl.*;
 import com.rpc.serializer.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
