@@ -1,4 +1,4 @@
-package com.shock.remote.server;
+package com.shock.remote.handler;
 
 import com.shock.remote.protocol.RemoteMessage;
 import com.shock.remote.common.NetUtil;

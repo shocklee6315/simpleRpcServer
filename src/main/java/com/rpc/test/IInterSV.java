@@ -7,4 +7,5 @@ public interface IInterSV {
 	
 	public void sayHello(String name);
 	public void exception(String name);
+	public Po  say(Po po);
 }

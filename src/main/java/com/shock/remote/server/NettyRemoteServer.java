@@ -1,11 +1,14 @@
 package com.shock.remote.server;
 
-import com.shock.remote.common.Constants;
 import com.shock.remote.RemoteServer;
 import com.shock.remote.RequestProcessor;
+import com.shock.remote.handler.HeartBeatHandler;
+import com.shock.remote.handler.RpcMessageProtoBufDecoder;
+import com.shock.remote.handler.RpcMessageProtoBufEncoder;
 import com.shock.remote.protocol.RemoteMessage;
 import com.shock.remote.common.MessageUtil;
 import com.shock.remote.common.NetUtil;
+import com.shock.remote.protocol.ResponseCode;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -226,7 +229,7 @@ public class NettyRemoteServer implements RemoteServer {
                     } catch (Exception e) {
                         logger.error("处理发生异常了", e);
                         RemoteMessage response = MessageUtil.createResponeMessage(
-                                Constants.ResponseCode.SYSTEM_ERROR, request.getMessageId(), MessageUtil.exceptionDesc(e));
+                                ResponseCode.SYSTEM_ERROR, request.getMessageId(), MessageUtil.exceptionDesc(e));
                         ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());;
                     }
 
@@ -239,7 +242,7 @@ public class NettyRemoteServer implements RemoteServer {
                 //服务器请求满了
                 logger.error("服务器处理线程已经满了,无法处理请求", e);
                 RemoteMessage response = MessageUtil.createResponeMessage(
-                        Constants.ResponseCode.SYSTEM_BUSY, request.getMessageId(), "system  busy! ");
+                        ResponseCode.SYSTEM_BUSY, request.getMessageId(), "system  busy! ");
                 ctx.writeAndFlush(response).addListener(new ResponseSendFutureListen());
             }
 

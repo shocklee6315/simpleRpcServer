@@ -1,9 +1,10 @@
 package com.rpc;
 
 import com.shock.remote.protocol.RemoteMessage;
-import com.shock.remote.server.HeartBeatHandler;
-import com.shock.remote.server.RpcMessageProtoBufDecoder;
-import com.shock.remote.server.RpcMessageProtoBufEncoder;
+import com.shock.remote.handler.HeartBeatHandler;
+import com.shock.remote.handler.RpcMessageProtoBufDecoder;
+import com.shock.remote.handler.RpcMessageProtoBufEncoder;
+import com.shock.remote.protocol.ResponseCode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -36,7 +37,7 @@ public class ClientTest {
                     public void initChannel(SocketChannel ch) throws Exception {
 
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast(new LoggingHandler(LogLevel.ERROR));
+//                        p.addLast(new LoggingHandler(LogLevel.ERROR));
                         p.addLast(new LengthFieldBasedFrameDecoder(65535,0,4,0,4));
                         p.addLast(new LengthFieldPrepender(4));
                         p.addLast(new RpcMessageProtoBufDecoder());
@@ -61,21 +62,38 @@ public class ClientTest {
 
     private static class HelloClientHandler extends ChannelHandlerAdapter {
 
-        int i =0;
+        int i =1;
+        long first =0;
+        long errorcount=0;
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             RemoteMessage message = new RemoteMessage();
-            for (int i=0;i<100;i++) {
+            long start =System.currentTimeMillis();
+            for (int i=0;i<800;i++) {
                 ctx.writeAndFlush(message);
             }
+            long end = System.currentTimeMillis();
+            System.out.println("========发送耗时" + (end -start));
         }
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg){
+            if(i==1){
+                first = System.currentTimeMillis();
+            }
+            if(i%800==0){
+                System.out.println("10000万条读数耗时"+(System.currentTimeMillis() - first));
+                System.out.println("获取错误总数"+errorcount);
+                first = System.currentTimeMillis();
+            }
             if(msg instanceof RemoteMessage){
-                System.out.println(((RemoteMessage) msg).getMessageId());
-                System.out.println(((RemoteMessage) msg).getRemarks());
-                System.out.println(msg);
-                System.out.println("消息index=" + (++i));
+//                System.out.println(((RemoteMessage) msg).getMessageId());
+//                System.out.println(((RemoteMessage) msg).getRemarks());
+                if(((RemoteMessage) msg).getRtnCode()!= ResponseCode.SUCCESS){
+                    errorcount ++;
+                }
+//                System.out.println(msg);
+                i++;
+//                System.out.println("消息index=" + (++i));
             }
         }
 

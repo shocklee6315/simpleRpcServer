@@ -1,4 +1,4 @@
-package com.shock.remote.server;
+package com.shock.remote.handler;
 
 import com.dyuproject.protostuff.ProtobufIOUtil;
 import com.dyuproject.protostuff.Schema;

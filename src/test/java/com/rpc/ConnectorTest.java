@@ -12,6 +12,8 @@ public class ConnectorTest {
     public static void main(String[] args) throws Exception{
         NettyServerConfig config = new NettyServerConfig();
         config.setListenPort(8081);
+        config.setServerWorkerThreads(16);
+        config.setServerMaxConcurrencyRequest(200);
         NettyRemoteServer server = new NettyRemoteServer(config);
         RequestProcessor processor = new RequestProcessor(){
 
@@ -21,7 +23,7 @@ public class ConnectorTest {
                 response.setVersion(1);
                 response.setRemarks("测试消息");
                 //试试耗时的拒绝消息
-                Thread.currentThread().sleep(1000L);
+                Thread.currentThread().sleep(1L);
                 return response;
             }
         };

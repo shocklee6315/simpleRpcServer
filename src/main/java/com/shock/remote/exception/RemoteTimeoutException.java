@@ -5,6 +5,8 @@ package com.shock.remote.exception;
  */
 public class RemoteTimeoutException extends RemoteException{
 
+    public static final long serialVersionUID = -3387516993124229950L;
+
     public RemoteTimeoutException(String message) {
         super(message);
     }

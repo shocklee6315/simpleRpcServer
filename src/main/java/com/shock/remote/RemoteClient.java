@@ -20,7 +20,7 @@ public interface RemoteClient {
 
     public RemoteMessage invokeSync(String addr , RemoteMessage request , long timeoutMilis) throws Exception;
 
-    public RemoteMessage invokeASync(String addr , RemoteMessage request , long timeoutMilis , InvokeCallback callback) throws Exception;
+    public void invokeASync(String addr , RemoteMessage request , long timeoutMilis , InvokeCallback callback) throws Exception;
 
 
 }

@@ -1,5 +1,7 @@
 package com.rpc.test;
 
+import java.util.Date;
+
 public class InterSVImpl implements IInterSV{
 
 	@Override
@@ -17,7 +19,17 @@ public class InterSVImpl implements IInterSV{
 	public void exception(String name) {
 		// TODO Auto-generated method stub
 		System.out.println(name);
-		throw new RuntimeException("±­¾ßÁË£¬Å×ÁË¸ö´í£¡");
+//		throw new RuntimeException("ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½Ë¸ï¿½ï¿½ï¿½");
+	}
+
+	@Override
+	public Po say(Po po) {
+		System.out.println(po);
+		Po r = new Po();
+		r.setAge(11);
+		r.setName("hhh");
+		r.setTime(new Date());
+		return r;
 	}
 
 }

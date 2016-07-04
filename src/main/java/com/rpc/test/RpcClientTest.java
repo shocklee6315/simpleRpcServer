@@ -1,5 +1,6 @@
 package com.rpc.test;
 
+import java.util.Date;
 import java.util.Random;
 
 import com.rpc.client.Client;
@@ -8,7 +9,7 @@ public class RpcClientTest {
 
 	public static void main(String[] args) throws Exception {
 
-		final Client client = new Client("tcp://localhost:8081");
+		final Client client = new Client("tcp://localhost:8091");
 		final IInterSV in = client.getProxy(IInterSV.class);
 		in.sayHello("102992����" );
 		for (int i = 0; i < 1; i++)
@@ -25,15 +26,22 @@ public class RpcClientTest {
 					;
 					for(int i =0 ; i<1 ;i++){
 						in.sayHello("102992����" + name);
+						Po p = new Po();
+						p.setAge(2);
+						p.setName("211dd");
+						p.setTime(new Date());
+						Po pp =in.say(p);
+						System.out.println(pp.getAge() +" " + pp.getName() + "" + pp.getTime());
 					}
+
 					end = System.currentTimeMillis();
 					System.out.println("��ʱ��"+(end - start));
-					try {
-						in.exception("102992����" + name);
-						
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+//					try {
+//						in.exception("102992" + name);
+//
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
 
 				}
 			}.start();

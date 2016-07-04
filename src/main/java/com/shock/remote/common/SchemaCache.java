@@ -9,7 +9,7 @@ public class SchemaCache {
 			4096);
 
 	@SuppressWarnings("unchecked")
-	public static <T> Schema<T> getSchema(Class<T> clazz) {
+	public static <T extends Object> Schema<T> getSchema(Class<T > clazz) {
 		String className = clazz.getName();
 		Schema<T> schema = (Schema<T>) SCHEMA_CACHE.get(className);
 		if (null != schema) {
