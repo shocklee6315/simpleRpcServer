@@ -45,9 +45,9 @@ public class NettyRemoteServer implements RemoteServer {
     public NettyRemoteServer(NettyServerConfig config){
         nettyServerConfig = config;
         bootstrap = new ServerBootstrap();
-        bossGroup = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads());
-        workerGroup = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads());
-        int workThreadNums = nettyServerConfig.getServerExecutorThreads();
+        bossGroup = new NioEventLoopGroup(1);//多路选择器线程,默认设置一个
+        workerGroup = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads());//数据处理线程,解码编码使用
+        int workThreadNums = nettyServerConfig.getServerExecutorThreads();//
         if (workThreadNums <= 0) {
             workThreadNums = 4;
         }

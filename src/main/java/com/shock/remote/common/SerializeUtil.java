@@ -3,6 +3,9 @@ package com.shock.remote.common;
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtobufIOUtil;
 import com.dyuproject.protostuff.Schema;
+import com.shock.remote.exception.SerializerException;
+import com.shock.remote.protocol.RemoteMessage;
+import io.netty.buffer.ByteBufInputStream;
 
 /**
  * Created by shocklee on 16/6/30.
@@ -17,4 +20,18 @@ public class SerializeUtil {
         byte[] data = ProtobufIOUtil.toByteArray(msg, schema, buffer);
         return data;
     }
+
+    public static <T> T protostuffDecode(byte[] bytes ,Class<T> tClass)throws SerializerException{
+        try {
+            Schema schema = SchemaCache.getSchema(tClass);
+            T obj = tClass.newInstance();
+            ProtobufIOUtil.mergeFrom(bytes, obj, schema);
+            return obj;
+        }catch (IllegalAccessException ex){
+            throw  new SerializerException(ex);
+        }catch (InstantiationException ex){
+            throw  new SerializerException(ex);
+        }
+    }
+
 }

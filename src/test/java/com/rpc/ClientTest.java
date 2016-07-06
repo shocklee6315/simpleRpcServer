@@ -1,5 +1,9 @@
 package com.rpc;
 
+import com.rpc.test.InterSVImpl;
+import com.shock.remote.body.RpcRequest;
+import com.shock.remote.body.RpcResponse;
+import com.shock.remote.common.SerializeUtil;
 import com.shock.remote.protocol.RemoteMessage;
 import com.shock.remote.handler.HeartBeatHandler;
 import com.shock.remote.handler.RpcMessageProtoBufDecoder;
@@ -69,7 +73,13 @@ public class ClientTest {
         public void channelActive(ChannelHandlerContext ctx) {
             RemoteMessage message = new RemoteMessage();
             long start =System.currentTimeMillis();
-            for (int i=0;i<800;i++) {
+            for (int i=0;i<10;i++) {
+                RpcRequest request = new RpcRequest();
+                request.setClassName(InterSVImpl.class.getName());
+                request.setMethodName("hello");
+                request.setParameterTypes(new String[]{String.class.getName()});
+                request.setParameters(new String[]{"nihao"});
+                message.setBody(SerializeUtil.protostuffEncode(request));
                 ctx.writeAndFlush(message);
             }
             long end = System.currentTimeMillis();
@@ -90,6 +100,9 @@ public class ClientTest {
 //                System.out.println(((RemoteMessage) msg).getRemarks());
                 if(((RemoteMessage) msg).getRtnCode()!= ResponseCode.SUCCESS){
                     errorcount ++;
+                }else {
+                    byte[] bytes = ((RemoteMessage) msg).getBody();
+                    System.out.println(SerializeUtil.protostuffDecode(bytes, RpcResponse.class));
                 }
 //                System.out.println(msg);
                 i++;

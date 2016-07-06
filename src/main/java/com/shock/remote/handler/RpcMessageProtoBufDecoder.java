@@ -2,6 +2,7 @@ package com.shock.remote.handler;
 
 import com.dyuproject.protostuff.ProtobufIOUtil;
 import com.dyuproject.protostuff.Schema;
+import com.shock.remote.common.SerializeUtil;
 import com.shock.remote.protocol.RemoteMessage;
 import com.shock.remote.common.IOUtils;
 import com.shock.remote.common.SchemaCache;
@@ -23,11 +24,8 @@ public class RpcMessageProtoBufDecoder extends ByteToMessageDecoder {
             return;
         }
         ByteBufInputStream ins = new ByteBufInputStream(in);
-        Schema schema = SchemaCache.getSchema(RemoteMessage.class);
         byte[] bytes = new byte[length];
         IOUtils.readFully(ins, bytes, 0, length);
-        RemoteMessage request = new RemoteMessage();
-        ProtobufIOUtil.mergeFrom(bytes, request, schema);
-        out.add(request);
+        out.add(SerializeUtil.protostuffDecode(bytes,RemoteMessage.class));
     }
 }
