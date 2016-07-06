@@ -5,7 +5,6 @@ package com.shock.remote.body;
  */
 public class RpcResponse {
 
-    private String requestID;
 
     private Throwable exception;
 
@@ -14,17 +13,6 @@ public class RpcResponse {
     public RpcResponse() {
     }
 
-    public RpcResponse(String requestID) {
-        this.requestID = requestID;
-    }
-
-    public String getRequestID() {
-        return requestID;
-    }
-
-    public void setRequestID(String requestID) {
-        this.requestID = requestID;
-    }
 
     public Throwable getException() {
         return exception;
@@ -45,7 +33,7 @@ public class RpcResponse {
     @Override
     public String toString() {
         return String.format(
-                "requestID: %s, result: %s, exception: %s", new Object[] {
-                        requestID, result, exception });
+                " result: %s, exception: %s", new Object[] {
+                         result, exception });
     }
 }

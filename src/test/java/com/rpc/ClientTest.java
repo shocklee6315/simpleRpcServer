@@ -73,7 +73,7 @@ public class ClientTest {
         public void channelActive(ChannelHandlerContext ctx) {
             RemoteMessage message = new RemoteMessage();
             long start =System.currentTimeMillis();
-            for (int i=0;i<10;i++) {
+            for (int i=0;i<1000;i++) {
                 RpcRequest request = new RpcRequest();
                 request.setClassName(InterSVImpl.class.getName());
                 request.setMethodName("hello");

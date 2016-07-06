@@ -7,32 +7,23 @@ import java.util.UUID;
  */
 public class RpcRequest {
 
-    private String requestID;
     private String className;
     private String methodName;
     private String[] parameterTypes;
     private Object[] parameters;
 
     public RpcRequest() {
-        this.requestID = UUID.randomUUID().toString();
+
     }
 
     public RpcRequest(String className, String methodName,
                       String[] parameterTypes, Object[] parameters) {
-        this.requestID =UUID.randomUUID().toString();
         this.className = className;
         this.methodName = methodName;
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;
     }
 
-    public String getRequestID() {
-        return requestID;
-    }
-
-    public void setRequestID(String requestID) {
-        this.requestID = requestID;
-    }
 
     public String getClassName() {
         return className;
@@ -68,8 +59,8 @@ public class RpcRequest {
 
     @Override
     public String toString() {
-        return String.format("requestID: %s, className: %s, methodName: %s, parameterTypes: %s, parameters: %s",
-                new Object[] { requestID, className, methodName,
+        return String.format(" className: %s, methodName: %s, parameterTypes: %s, parameters: %s",
+                new Object[] {  className, methodName,
                         parameterTypes, parameters });
     }
 }
