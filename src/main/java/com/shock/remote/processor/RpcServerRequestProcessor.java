@@ -4,6 +4,7 @@ import com.shock.remote.RequestProcessor;
 import com.shock.remote.beans.BeanFactory;
 import com.shock.remote.body.RpcRequest;
 import com.shock.remote.body.RpcResponse;
+import com.shock.remote.common.ReflectionUtil;
 import com.shock.remote.common.MessageUtil;
 import com.shock.remote.common.SerializeUtil;
 import com.shock.remote.protocol.RemoteMessage;
@@ -35,10 +36,23 @@ public class RpcServerRequestProcessor implements RequestProcessor {
 
         if(body!=null && body.length>0){
             RpcRequest rpcRequest =SerializeUtil.protostuffDecode(body, RpcRequest.class);
-            RpcResponse rpcResponse = invokeRpc(rpcRequest);
-            byte[]respbody = SerializeUtil.protostuffEncode(rpcResponse);
-            RemoteMessage response =MessageUtil.createResponeMessage(ResponseCode.SUCCESS,request.getMessageId(),"成功");
-            response.setBody(respbody);
+            RpcResponse rpcResponse =null;
+            try {
+                rpcResponse = invokeRpc(rpcRequest);
+
+            }catch (Exception ex){
+                logger.error("调用rpc服务失败" ,ex);
+                return MessageUtil.createResponeMessage(ResponseCode.SYSTEM_ERROR ,request.getMessageId(),MessageUtil.exceptionDesc(ex));
+            }
+
+            RemoteMessage response = MessageUtil.createResponeMessage(ResponseCode.SUCCESS, request.getMessageId(), "成功");
+
+            if(rpcResponse !=null) {
+                byte[] respbody = SerializeUtil.protostuffEncode(rpcResponse);
+
+                response.setBody(respbody);
+
+            }
             return response;
         }
         return MessageUtil.createResponeMessage(ResponseCode.REQUEST_CODE_NOT_SUPPORTED,request.getMessageId(),"失败");
@@ -56,9 +70,9 @@ public class RpcServerRequestProcessor implements RequestProcessor {
         List<Class> parameterTypes = new ArrayList<Class>();
         try {
             for (String s : paramTypes) {
-                parameterTypes.add(Class.forName(s));
+                parameterTypes.add(ReflectionUtil.forName(s));
             }
-            Class clazz = Class.forName(className);
+            Class clazz = ReflectionUtil.forName(className);
             Method m = clazz.getMethod(methodName, parameterTypes.toArray(new Class[0]));
             Object rtn = m.invoke(obj,request.getParameters());
             response.setResult(rtn);

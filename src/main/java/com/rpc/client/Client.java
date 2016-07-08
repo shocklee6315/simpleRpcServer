@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 
 import com.rpc.serializer.RpcRequest;
 import com.rpc.serializer.RpcResponse;
-import com.shock.remote.common.ClassUtil;
+import com.shock.remote.common.ReflectionUtil;
 
 public class Client {
 	ConnectionManager connectionManager;
@@ -27,7 +27,7 @@ public class Client {
 		if(!clazz.isInterface()){
 			throw new IllegalArgumentException(String.format("class %s is not an interface! " ,clazz.getName()));
 		}
-		return (T) Proxy.newProxyInstance(ClassUtil.getDefaultClassLoader(), new Class[]{clazz}, new ClientInvoker(clazz));
+		return (T) Proxy.newProxyInstance(ReflectionUtil.getDefaultClassLoader(), new Class[]{clazz}, new ClientInvoker(clazz));
 	}
 	
 	public <T> void callAsync(Method method ,Callback<T> callback ,Object ... args ){
