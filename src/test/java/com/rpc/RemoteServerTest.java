@@ -1,8 +1,11 @@
 package com.rpc;
 
+import com.rpc.test.IInterSV;
 import com.rpc.test.InterSVImpl;
 import com.shock.remote.RequestProcessor;
 import com.shock.remote.beans.BeanFactory;
+import com.shock.remote.processor.RpcBeanDefinition;
+import com.shock.remote.processor.RpcBeanFactory;
 import com.shock.remote.processor.RpcServerRequestProcessor;
 import com.shock.remote.server.NettyRemoteServer;
 import com.shock.remote.server.NettyServerConfig;
@@ -30,23 +33,29 @@ public class RemoteServerTest {
 //                return response;
 //            }
 //        };
-        BeanFactory factory = new BeanFactory(){
-
-            @Override
-            public Object getBean(String name) throws Exception {
-                System.out.println(name);
-                return new InterSVImpl();
-            }
-            @Override
-            public <T> T getBean(String name, Class<T> requiredType) throws Exception {
-                return requiredType.newInstance();
-            }
-            @Override
-            public <T> T getBean(Class<T> requiredType) throws Exception {
-                System.out.println(requiredType.getName());
-                return requiredType.newInstance();
-            }
-        };
+//        BeanFactory factory = new BeanFactory(){
+//
+//            @Override
+//            public Object getBean(String name) throws Exception {
+//                System.out.println(name);
+//                return new InterSVImpl();
+//            }
+//            @Override
+//            public <T> T getBean(String name, Class<T> requiredType) throws Exception {
+//                return requiredType.newInstance();
+//            }
+//            @Override
+//            public <T> T getBean(Class<T> requiredType) throws Exception {
+//                System.out.println(requiredType.getName());
+//                return requiredType.newInstance();
+//            }
+//        };
+        RpcBeanFactory factory = new RpcBeanFactory();
+        RpcBeanDefinition definition = new RpcBeanDefinition();
+        definition.setBeanClassName(InterSVImpl.class.getName());
+        definition.setBeanExportClassName(IInterSV.class.getName());
+        definition.setBeanName("InterSV");
+        factory.addBeanDefinion(definition);
         server.regesterRequestProcessor(new RpcServerRequestProcessor(factory));
         server.start();
         System.in.read();

@@ -1,5 +1,6 @@
 package com.rpc;
 
+import com.rpc.test.IInterSV;
 import com.rpc.test.InterSVImpl;
 import com.shock.remote.body.RpcRequest;
 import com.shock.remote.body.RpcResponse;
@@ -75,7 +76,7 @@ public class ClientTest {
             long start =System.currentTimeMillis();
             for (int i=0;i<1000;i++) {
                 RpcRequest request = new RpcRequest();
-                request.setClassName(InterSVImpl.class.getName());
+                request.setClassName(IInterSV.class.getName());
                 request.setMethodName("hello");
                 request.setParameterTypes(new String[]{String.class.getName()});
                 request.setParameters(new String[]{"nihao"});

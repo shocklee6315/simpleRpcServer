@@ -61,9 +61,8 @@ public class RpcServerRequestProcessor implements RequestProcessor {
 
     private RpcResponse invokeRpc(RpcRequest request) throws Exception {
 
-        Object obj = beanFactory.getBean(request.getClassName());
+        Object obj = beanFactory.getBean(ReflectionUtil.forName(request.getClassName()));
 
-        String className = request.getClassName();
         String methodName = request.getMethodName();
         String[] paramTypes = request.getParameterTypes();
         RpcResponse response = new RpcResponse();
@@ -72,8 +71,7 @@ public class RpcServerRequestProcessor implements RequestProcessor {
             for (String s : paramTypes) {
                 parameterTypes.add(ReflectionUtil.forName(s));
             }
-            Class clazz = ReflectionUtil.forName(className);
-            Method m = clazz.getMethod(methodName, parameterTypes.toArray(new Class[0]));
+            Method m = obj.getClass().getMethod(methodName, parameterTypes.toArray(new Class[0]));
             Object rtn = m.invoke(obj,request.getParameters());
             response.setResult(rtn);
         }  catch (ClassNotFoundException e) {
