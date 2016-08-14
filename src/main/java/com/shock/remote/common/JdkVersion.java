@@ -49,7 +49,7 @@ public abstract class JdkVersion {
         }
         else if (javaVersion.indexOf("1.5.") != -1) {
             majorJavaVersion = JAVA_15;
-        }else if (javaVersion.indexOf("") !=-1){
+        }else if (javaVersion.indexOf("1.8.") !=-1){
             majorJavaVersion =JAVA_18 ;
         }
         else {

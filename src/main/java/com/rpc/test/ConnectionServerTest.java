@@ -15,6 +15,7 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,13 +32,20 @@ public class ConnectionServerTest {
         EventLoopGroup workerGroup = new NioEventLoopGroup(16);
         try {
             ServerBootstrap b = new ServerBootstrap();
-
+//            ServerBootstrap b2 = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(
                     NioServerSocketChannel.class).handler(
                     new LoggingHandler(LogLevel.INFO)).childHandler(
-                    new NettyServerInitializer());
+                    new NettyServerInitializer()).childAttr(AttributeKey.newInstance("abc"),"aaaa");
+//            b2.group(bossGroup, workerGroup).channel(
+//                    NioServerSocketChannel.class).handler(
+//                    new LoggingHandler(LogLevel.INFO)).childHandler(
+//                    new NettyServerInitializer()).bind(8082);
+
             try {
                 final ChannelFuture future = b.bind(8081).sync();
+                final ChannelFuture future2 = b.bind(8082).sync();
+
                 new Thread(){
                     public void run(){
                         int i=0 ;
@@ -83,7 +91,7 @@ public class ConnectionServerTest {
                     }
                 }.start();
 
-//                future.channel().closeFuture().sync();
+                future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -100,6 +108,7 @@ public class ConnectionServerTest {
         protected void initChannel(SocketChannel ch) throws Exception {
             ChannelPipeline p = ch.pipeline();
             p.addLast(new IdleStateHandler(6, 3, 0));
+            System.out.println(ch.attr(AttributeKey.valueOf("abc")));
 //            ch.pipeline().addLast(new ChannelHandlerAdapter(){
 //                @Override
 //                public void userEventTriggered(

@@ -32,6 +32,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class NettyRemoteServer implements RemoteServer {
 
     private  static transient  Logger logger = LoggerFactory.getLogger(NettyRemoteServer.class);
+
+    private final Thread jvmShutdownHook = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            //进程关闭时做些处理
+        }
+    }, "NettyRemoteServer-JVM-shutdown-hook");
+
     int port =0;
     ServerBootstrap bootstrap ;
     EventLoopGroup bossGroup;
@@ -109,10 +117,27 @@ public class NettyRemoteServer implements RemoteServer {
                             }
                         });
         try {
-            final ChannelFuture future = bootstrap.bind().sync();
+            final ChannelFuture future = bootstrap.bind().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future)
+                        throws Exception {
+                    if (future.isSuccess()) {
+//                        registerChannel(future.channel());
+                    }
+                }
+            }).awaitUninterruptibly();
+
+            Throwable cause = future.cause();
+
+            if (cause != null) {
+                throw new RuntimeException(cause);
+            }
+
             InetSocketAddress addr = (InetSocketAddress) future.channel().localAddress();
             this.port = addr.getPort();
-        } catch (InterruptedException e) {
+            logger.info("Server started at address: " +addr);
+            Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
+        } catch (Exception e) {
             logger.error("发生系统异常", e);
             throw new RuntimeException("serverBootstrap.bind().sync() InterruptedException", e);
         }
@@ -136,6 +161,11 @@ public class NettyRemoteServer implements RemoteServer {
             }
         }
 
+        try {
+            Runtime.getRuntime().removeShutdownHook(jvmShutdownHook);
+        } catch (IllegalStateException e) {
+            // ignore -- IllegalStateException means the VM is already shutting down
+        }
     }
 
     @Override

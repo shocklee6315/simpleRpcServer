@@ -65,7 +65,7 @@ public class ConnectionClientTest {
                     }
                 });
 
-        final ChannelFuture future = bootstrap.connect(new InetSocketAddress("127.0.0.1", 8081)).sync();
+        final ChannelFuture future = bootstrap.connect(new InetSocketAddress("127.0.0.1", 8082)).sync();
 
         new Thread() {
             public void run() {
